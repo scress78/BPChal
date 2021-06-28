@@ -183,12 +183,12 @@ while year_count <= 2021:
     year_count += 1
     month_count = 1
 
-print(month_data)
+#print(month_data)
 for i in month_data:
     i[1] = i[1] / i[4]
     i[2] = i[2] / i[4]
     i[3] = i[3] / i[4]
-print(month_data)
+#print(month_data)
 mean_temps = []
 high_temps = []
 low_temps = []
@@ -198,7 +198,7 @@ for i in month_data:
     high_temps.append(month_data[count][2])
     low_temps.append(month_data[count][3])
     count += 1
-print(mean_temps)
+#print(mean_temps)
 
 X = np.arange(12)
 
