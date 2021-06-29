@@ -57,6 +57,10 @@ with open(weather) as w:
     daily_low_temp_avg = 0
     daily_high_temp_avg = 0
 
+    # if a date isn't present use the weather data from the previous day
+    stored_daily_mean = 0
+    stored_daily_low = 0
+    stored_daily_high = 0
 
     date = ''
     for row in csv_reader:
@@ -77,12 +81,26 @@ with open(weather) as w:
             weighted_daily_temps_entry.append(daily_high_temp_avg)
             weighted_daily_temps_entry.append(daily_low_temp_avg)
             if daily_mean_temp_avg != 0:
-                weighted_daily_temps_table.append(weighted_daily_temps_entry)
+                weighted_daily_temps_table.append(weighted_daily_temps_entry) # daily entries are [date, mean, high, low]
+
+                # thought below was the way to do it.. but it isn't.. should find the data from the table
+                # we already made
+            # if daily_mean_temp_avg == 0 and stored_daily_mean != 0:
+            #     print("PROJECTED DATA!")
+            #     weighted_daily_temps_entry.append(date)
+            #     weighted_daily_temps_entry.append(daily_mean_temp_avg)
+            #     weighted_daily_temps_entry.append(daily_high_temp_avg)
+            #     weighted_daily_temps_entry.append(daily_low_temp_avg)
 
             weighted_daily_temps_entry = []
             locs_at_date = 1
             #print("date changed")
             date_count += 1
+
+            stored_daily_mean = daily_mean_temp_avg
+            stored_daily_high = daily_high_temp_avg
+            stored_daily_low = daily_low_temp_avg
+
 
             # to tally daily temperatures
             mean_temp_weighted_tally = 0
@@ -161,8 +179,11 @@ for month in months:
 
 year_count = 2015
 month_count = 1
+absent_dates = []  # this table will hold dates not listed in the .csv file. We project data to these dates by grabbing
+# the daily averages from the previous date
 while year_count <= 2021:
     day_count = 1
+    my_date_present = False
     while month_count <= 12:
         while day_count <= 31:
             my_date = str(month_count) + "/" + str(day_count) + "/" + str(year_count)
@@ -170,6 +191,7 @@ while year_count <= 2021:
                 #print(my_date, i[0])
                 #print(month_count)
                 if my_date in i[0]:
+                    my_date_present = True
                     if month_count <= 12:
                         month_data[month_count - 1][4] += 1
                         month_data[month_count - 1][1] += i[1]
@@ -177,11 +199,82 @@ while year_count <= 2021:
                         month_data[month_count - 1][3] += i[3]
             #print(str(month_count) + "\\" + str(day_count) + "\\" + str(year_count))
             day_count += 1
+            impossible_dates = ['2/31', '2/30', '2/29','4/31', '6/31', '9/31', '11/31'] #nice that the leap year 2/29 was included
+            for i in impossible_dates:
+                if i in my_date:
+                    my_date_present = True
+            if day_count >= 21 and month_count >= 4 and year_count >= 2021:
+                my_date_present = True
+            if month_count > 4 and year_count >= 2021:
+                my_date_present = True
+            if my_date_present is False:
+                absent_dates.append(my_date)
+                #print("MISSED DATE! "+ my_date)
+            my_date_present = False
         month_count += 1
         #print(month_data)
         day_count = 1
     year_count += 1
     month_count = 1
+
+
+
+# print(absent_dates)
+# Projected data handling below
+# GENERATE LIST OF DATES TO GRAB PROJECTIONS
+# not going to do this programatically.. it's part of the problem but it's not a big part and once again
+#  there's an easier solution... which is BELOW in the list projection_dates
+# for i in absent_dates:
+#     print(len(i))
+#     if len(i) == 8:
+#         new_day = int(i[2]) - 1
+#         x = i[0:2] +str(new_day) + i[3:8]
+#         #projection_dates.append(x)  # BE SURE TO UNCOMMENT!
+#     # if len(i) == 9 and i[3] != 0 and i[2] != '/' and i[4] != 0:
+#     #     new_day = int(i[3]) - 1
+#     #     x = i[0:2] +str(new_day) + i[3:9]
+#     #     projection_dates.append(x)
+
+projection_dates = ['3/6/2015', '10/30/2015', '3/11/2016', '11/4/2016', '3/10/2017', '9/14/2017', '11/3/2017', '3/9/2018',
+                    '11/2/2018', '3/8/2019', '11/1/2019', '3/6/2020', '10/30/2020', '3/12/2021']
+# manually entered list of dates from which we need to grab temperature data and add to our graph
+#  then later make info about
+count = 1
+projected_data = []
+for i in weighted_daily_temps_table:
+    #print(i[0])
+    for d in projection_dates:
+        if d in i[0]:
+            #print(i)
+            if count < len(projection_dates):
+                date_entry = projection_dates[len(projection_dates) - count]
+                #print(projection_dates[len(projection_dates) - count])
+                project_data_entry = []
+                project_data_entry.append(date_entry)
+                project_data_entry.append(i[1])
+                project_data_entry.append(i[2])
+                project_data_entry.append(i[3])
+                #print(project_data_entry)
+                #print(project_data_entry)
+                weighted_daily_temps_table.append(project_data_entry)
+                projected_data.append(project_data_entry)
+            if count == len(projection_dates):
+                date_entry = projection_dates[0]
+                #print(projection_dates[len(projection_dates) - count])
+                project_data_entry = []
+                project_data_entry.append(date_entry)
+                project_data_entry.append(i[1])
+                project_data_entry.append(i[2])
+                project_data_entry.append(i[3])
+                #print(project_data_entry)
+                # print(project_data_entry)
+                weighted_daily_temps_table.append(project_data_entry)
+                projected_data.append(project_data_entry)
+
+            count += 1
+
+
+print(projected_data)
 
 #print(month_data)
 for i in month_data:
@@ -208,8 +301,31 @@ plt.xticks(np.arange(12), months, rotation=45)
 plt.ylabel("Temperature (*C)")
 
 plt.bar(X + .5, high_temps, width=.25, color='red', label="High")
-plt.bar(X + .25, mean_temps, width=.25, color='black', label="Median")
+plt.bar(X + .25, mean_temps, width=.25, color='black', label="Mean")
 plt.bar(months, low_temps, width=.25, color='blue', label="Low")
+plt.legend(loc=1)
+plt.show()
+
+# Projected data graph
+dates = []
+mean_temps = []
+high_temps = []
+low_temps = []
+for i in projected_data:
+    dates.append(i[0])
+    mean_temps.append(i[1])
+    high_temps.append(i[2])
+    low_temps.append(i[3])
+
+X = np.arange(len(dates))
+plt.title("Projected Data Summary")
+plt.xlabel("Dates")
+plt.xticks(np.arange(len(dates)), dates, rotation=45)
+plt.ylabel("Temperature (*C)")
+
+plt.bar(X + .5, high_temps, width=.25, color='red', label="High")
+plt.bar(X + .25, mean_temps, width=.25, color='black', label="Mean")
+plt.bar(X, low_temps, width=.25, color='blue', label="Low")
 plt.legend(loc=1)
 plt.show()
 
