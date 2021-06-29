@@ -246,8 +246,8 @@ for i in weighted_daily_temps_table:
     for d in projection_dates:
         if d in i[0]:
             #print(i)
-            if count < len(projection_dates):
-                date_entry = projection_dates[len(projection_dates) - count]
+            if count < len(absent_dates):
+                date_entry = absent_dates[len(absent_dates) - count]
                 #print(projection_dates[len(projection_dates) - count])
                 project_data_entry = []
                 project_data_entry.append(date_entry)
@@ -258,8 +258,8 @@ for i in weighted_daily_temps_table:
                 #print(project_data_entry)
                 weighted_daily_temps_table.append(project_data_entry)
                 projected_data.append(project_data_entry)
-            if count == len(projection_dates):
-                date_entry = projection_dates[0]
+            if count == len(absent_dates):
+                date_entry = absent_dates[0]
                 #print(projection_dates[len(projection_dates) - count])
                 project_data_entry = []
                 project_data_entry.append(date_entry)
@@ -267,9 +267,21 @@ for i in weighted_daily_temps_table:
                 project_data_entry.append(i[2])
                 project_data_entry.append(i[3])
                 #print(project_data_entry)
-                # print(project_data_entry)
+                #print(project_data_entry)
                 weighted_daily_temps_table.append(project_data_entry)
                 projected_data.append(project_data_entry)
+            # if count == len(projection_dates):
+            #     date_entry = projection_dates[0]
+            #     #print(projection_dates[len(projection_dates) - count])
+            #     project_data_entry = []
+            #     project_data_entry.append(date_entry)
+            #     project_data_entry.append(i[1])
+            #     project_data_entry.append(i[2])
+            #     project_data_entry.append(i[3])
+            #     #print(project_data_entry)
+            #     # print(project_data_entry)
+            #     weighted_daily_temps_table.append(project_data_entry)
+            #     projected_data.append(project_data_entry)
 
             count += 1
 
