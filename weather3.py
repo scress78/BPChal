@@ -26,13 +26,83 @@ with open(population) as p:
         if count == 0:
             count += 1
 
+def population_computer():
+    global weather
+    global city_pop_weight_table
+    daily_population = 0
+    my_pseudo_city = ''
+    stored_date = ''
+    count = 0
+
+    def airport_pseudonym_converter(my_row):
+        """
+        converts airport names to common names to match in weighted city population table
+        :param my_row: location in row where city/airport name is stored. In this case always row[0]
+        :return: a pseudonym for weather data gathered at and referenced by the city's airport
+        """
+        global my_pseudo_city
+        airports = ['Detroit/Wayne', 'Wash DC/Dulles', 'NYC/LaGuardia', "Chicago O'Hare",
+                    'Phoenix/Sky HRBR', 'Raleigh/Durham', 'Sacramento/Execu', 'St Louis/Lambert']
+        if my_row in airports:
+            my_pseudo_city = ""
+            if "Detroit" in my_row:
+                my_pseudo_city = ("Detroit")
+            if "Dulles" in my_row:
+                my_pseudo_city = ("Washington")
+            if "NYC" in my_row:
+                my_pseudo_city = ("New York")
+            if "Hare" in my_row:
+                my_pseudo_city = ("Chicago")
+            if "HRBR" in my_row:
+                my_pseudo_city = ("Phoenix")
+            if "Durham" in my_row:
+                my_pseudo_city = ("Raleigh")
+            if "Execu" in my_row:
+                my_pseudo_city = ("Sacramento")
+            if "Lambert" in my_row:
+                my_pseudo_city = ("St. Louis")
+        else:
+            my_pseudo_city = my_row
+        return my_pseudo_city
+
+    with open(weather) as w:
+        csv_reader = csv.reader(w, delimiter= ',')
+        for row in csv_reader:
+            if count == 1:
+                date = row[5]
+                airport_pseudonym_converter(row[0])
+                for x in city_pop_weight_table:
+                    if row[0] == my_pseudo_city:
+                        daily_population += int(x[2])
+                stored_date = date
+            if count > 1:
+                date = row[5]
+                #print(date, stored_date)
+                if stored_date != date:
+                    #print(stored_date, daily_population)
+                    daily_population = 0
+                my_pseudo_city = airport_pseudonym_converter(row[0])
+                for x in city_pop_weight_table:
+                    #print(x[0]), my_pseudo_city
+                    if x[0] == my_pseudo_city:
+                        daily_population += int(x[2])
+                stored_date = date
+            #print(count)
+            count += 1
+    #print(daily_population)
+    # w.close()
+
+population_computer()
+
+
+
 # temperatures by date.
 with open(weather) as w:
     csv_reader = csv.reader(w, delimiter=',')
     # bullshit
     count = 0  # keeps track of rows in file (not really necessary)
     daily_population = 0  # wrote code to compute; but daily_pop is actually just always 20142145, so cheated
-    #  new population WITH ALBANY 20239623
+    # mess up here,, population was computed without converting airports to city names.. daily population 35218414
 
     # not bullshit
     stored_date = ''  # tracker to watch for date changing and trigger daily information dump
@@ -44,7 +114,7 @@ with open(weather) as w:
                  'Portland', 'Raleigh', 'Richmond', 'Sacramento', 'Seattle', 'San Francisco', 'Salt Lake City',
                  'St. Louis']
 
-    print(len(city_list))
+    #print(len(city_list))
     cities_present = []
     city_checklist = []
 
@@ -324,8 +394,9 @@ with open(weather) as w:
 
             # build your weighted weather report on a normal day
             for x in city_pop_weight_table:
-                if row[0] == x[0] and row[0] not in daily_duplicates:
-                    if row[0] in duplicates:
+                my_pseudo_city = airport_pseudonym_converter(row[0])
+                if my_pseudo_city == x[0] and my_pseudo_city not in daily_duplicates:
+                    if my_pseudo_city in duplicates:
                         daily_duplicates.append(row[0])
                     mean_temp_weighted_tally += (float(row[6]) * float(x[1]))
                     low_temp_weighted_tally += (float(row[7]) * float(x[1]))
@@ -342,7 +413,7 @@ with open(weather) as w:
     #print(ninesixteen_tracker)
     # for i in ninesixteen_tracker:
     #     print(i[4])
-    #print(weighted_daily_temps_table)
+    # print(weighted_daily_temps_table)
     # print(cities_checklist)
 
 
@@ -364,7 +435,7 @@ for d in dates:
     else:
         count += 1
 
-print(mean_temps[2042], high_temps[2042], low_temps[2042])
+#print(mean_temps[2042], high_temps[2042], low_temps[2042])
 
 new_ticks = []
 for n, i in enumerate(dates):
