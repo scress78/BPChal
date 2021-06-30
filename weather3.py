@@ -63,10 +63,16 @@ with open(weather) as w:
     stored_daily_high = 0
 
     stored_date = ''
+    check_list_date = ''
     date = ''
     first_row = True
     cities_checklist = []
     my_pseudo_city = ''
+    ninesixteen_tracker = []
+
+    duplicates = ['Rochester', 'Columbus', 'Columbia', 'Pasadena', 'Richmond', 'Aurora', 'Springfield',
+                  'Peoria', 'Kansas City', 'Glendale']  # some locations in Population Data.csv are the same name for two different cities. This list helps to prevent duplicate data from being entered.
+    daily_duplicates = []
 
     def weighted_daily_check_entry():
         global check_list_date
@@ -232,20 +238,6 @@ with open(weather) as w:
             pass
         if count != 0:
             date = row[5]
-
-            if date == '9/14/2017':
-                print("9/14/2017 is the DATE!")
-                print(check_list_date)
-
-            if date == '9/15/2017':
-                print(row[0], mean_temp_weighted_tally, high_temp_weighted_tally, low_temp_weighted_tally)
-                print(row[0], stored_daily_mean, stored_daily_high, stored_daily_low)
-                print(cities_checklist)
-            if date == '9/16/2017':
-                print(row[0], stored_daily_mean, stored_daily_high, stored_daily_low)
-                print(cities_checklist)
-
-
             # check to see if there's a checklist of cities which require projections for the day..
             #      always try to clear the checklist and store projection data FIRST!
             if len(cities_checklist) != 0:
@@ -261,7 +253,12 @@ with open(weather) as w:
                                 projected_data_entry.append((float(row[8]) * float(x[1])))  # append high
                                 projected_data_entry.append((float(row[7]) * float(x[1])))  # append low
                                 projected_data_entry.append(my_pseudo_city)  # append city
+
                                 projected_data.append(projected_data_entry)
+                                dates = ['9/15/2017', '9/16/2017', '9/17/2017', '9/14/2017']
+                                if date in dates:
+                                    projected_data_entry.append(date)
+                                    ninesixteen_tracker.append(projected_data_entry)
                                 # if date == '9/15/2017':
                                 #     print("PROJECTED DATA ENTRY 9/15")
                                 #     print(projected_data_entry)
@@ -276,22 +273,13 @@ with open(weather) as w:
 
             if row[0] in cities_checklist:
                 for x in city_pop_weight_table:
-                    if row[0] == x[0]:
+                    if row[0] == x[0] and row[0] not in daily_duplicates:
+                        if row[0] in duplicates:
+                            daily_duplicates.append(row[0])
                         try:
                             stored_daily_mean += (float(row[6]) * float(x[1]))
                             stored_daily_low += (float(row[7]) * float(x[1]))
                             stored_daily_high += (float(row[8]) * float(x[1]))
-
-                            if check_list_date == '9/17/2015':
-                                pass
-                                # print("SECOND RUN!")
-                                # print(stored_daily_mean, stored_daily_high, stored_daily_low)
-                                # print(len(cities_checklist))
-
-                            if stored_date == "9/16/2015":
-                                pass
-                                # print(stored_daily_mean, stored_daily_high, stored_daily_low)
-                                # print(len(cities_checklist))
 
                             # record that you projected weather
                             projected_data_entry = []  # stored as [date, mean, high, low, city]
@@ -301,27 +289,19 @@ with open(weather) as w:
                             projected_data_entry.append((float(row[7]) * float(x[1])))  # append low
                             projected_data_entry.append(row[0])  # append city
                             projected_data.append(projected_data_entry)
+
                             # remove the city from the checklist
                             cities_checklist.remove(row[0])
-
-                            # if date == '9/15/2017':
-                            #     print("PROJECTED DATA 2")
-                            #     print(projected_data_entry)
-                            # if date == '9/14/2017':
-                            #     print("PROJECTED DATA FROM 9/14")
-                            #     print(projected_data_entry)
-
                         except:
                             pass
 
                 # at the end check to see if cities checklist is NOW empty.. then add to table
                 if len(cities_checklist) == 0:
-                    # print("USED BACKUP METHOD!")
-                    # print(check_list_date)
                     weighted_daily_check_entry()
 
             # end of a day marker
             if stored_date != date and count != 1:
+                daily_duplicates = []
                 # if the date isn't the same you need to first check to see whether your table is complete
                 if len(cities_present) != 38:
                     cities_checklist = city_list.copy()
@@ -333,9 +313,6 @@ with open(weather) as w:
                         
                 if len(cities_checklist) != 0:
                     # if there's a checklist store your running data
-
-                    # below is the only time checklist date is changed. one of your final issues
-                    #  check_list_date still registering off two days later.
                     transfer_to_daily()
 
                 if len(cities_checklist) == 0:
@@ -347,7 +324,9 @@ with open(weather) as w:
 
             # build your weighted weather report on a normal day
             for x in city_pop_weight_table:
-                if row[0] == x[0]:
+                if row[0] == x[0] and row[0] not in daily_duplicates:
+                    if row[0] in duplicates:
+                        daily_duplicates.append(row[0])
                     mean_temp_weighted_tally += (float(row[6]) * float(x[1]))
                     low_temp_weighted_tally += (float(row[7]) * float(x[1]))
                     high_temp_weighted_tally += (float(row[8]) * float(x[1]))
@@ -359,7 +338,10 @@ with open(weather) as w:
 
     print("row count: " + str(count))
 
-    print(projected_data)
+    #print(projected_data)
+    #print(ninesixteen_tracker)
+    # for i in ninesixteen_tracker:
+    #     print(i[4])
     #print(weighted_daily_temps_table)
     # print(cities_checklist)
 
