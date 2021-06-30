@@ -40,9 +40,11 @@ with open(weather) as w:
     city_list = ['Albany', 'Atlanta', 'Windsor Locks', 'Nashville', 'Boise', 'Boston', 'Buffalo', 'Burbank',
                  'Baltimore', 'Columbus', 'Los Angeles', 'Covington', 'Washington', 'Denver', 'Dallas', 'Detroit',
                  'Fresno', 'Spokane', 'Washington', 'Houston', 'Las Vegas', 'New York', 'Little Rock', 'Memphis',
-                 'Minneapolis', 'New Orleans', "Chicago", 'Portland', 'Philadelphia', 'Phoenix', 'Pittsburgh',
+                 'Minneapolis', 'New Orleans', "Chicago", 'Philadelphia', 'Phoenix', 'Pittsburgh',
                  'Portland', 'Raleigh', 'Richmond', 'Sacramento', 'Seattle', 'San Francisco', 'Salt Lake City',
                  'St. Louis']
+
+    print(len(city_list))
     cities_present = []
     city_checklist = []
 
@@ -231,11 +233,18 @@ with open(weather) as w:
         if count != 0:
             date = row[5]
 
-            if date == '9/17/2015':
+            if date == '9/14/2017':
+                print("9/14/2017 is the DATE!")
+                print(check_list_date)
+
+            if date == '9/15/2017':
                 print(row[0], mean_temp_weighted_tally, high_temp_weighted_tally, low_temp_weighted_tally)
-            if date == '9/16/2015':
                 print(row[0], stored_daily_mean, stored_daily_high, stored_daily_low)
                 print(cities_checklist)
+            if date == '9/16/2017':
+                print(row[0], stored_daily_mean, stored_daily_high, stored_daily_low)
+                print(cities_checklist)
+
 
             # check to see if there's a checklist of cities which require projections for the day..
             #      always try to clear the checklist and store projection data FIRST!
@@ -253,6 +262,9 @@ with open(weather) as w:
                                 projected_data_entry.append((float(row[7]) * float(x[1])))  # append low
                                 projected_data_entry.append(my_pseudo_city)  # append city
                                 projected_data.append(projected_data_entry)
+                                # if date == '9/15/2017':
+                                #     print("PROJECTED DATA ENTRY 9/15")
+                                #     print(projected_data_entry)
                                 # remove the city from the checklist
                                 cities_checklist.remove(my_pseudo_city)
 
@@ -292,6 +304,13 @@ with open(weather) as w:
                             # remove the city from the checklist
                             cities_checklist.remove(row[0])
 
+                            # if date == '9/15/2017':
+                            #     print("PROJECTED DATA 2")
+                            #     print(projected_data_entry)
+                            # if date == '9/14/2017':
+                            #     print("PROJECTED DATA FROM 9/14")
+                            #     print(projected_data_entry)
+
                         except:
                             pass
 
@@ -304,7 +323,7 @@ with open(weather) as w:
             # end of a day marker
             if stored_date != date and count != 1:
                 # if the date isn't the same you need to first check to see whether your table is complete
-                if len(cities_present) != 39:
+                if len(cities_present) != 38:
                     cities_checklist = city_list.copy()
                     for i in cities_present:
                         if i in cities_checklist:
@@ -314,6 +333,9 @@ with open(weather) as w:
                         
                 if len(cities_checklist) != 0:
                     # if there's a checklist store your running data
+
+                    # below is the only time checklist date is changed. one of your final issues
+                    #  check_list_date still registering off two days later.
                     transfer_to_daily()
 
                 if len(cities_checklist) == 0:
@@ -337,7 +359,7 @@ with open(weather) as w:
 
     print("row count: " + str(count))
 
-    # print(projected_data)
+    print(projected_data)
     #print(weighted_daily_temps_table)
     # print(cities_checklist)
 
